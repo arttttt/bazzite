@@ -200,8 +200,7 @@ jobs:
 
       - name: Generate tags array
         id: generate-tags
-        run: |
-          echo "alias_tags=${{ steps.rechunk.outputs.version }}" >> $GITHUB_OUTPUT
+        run: echo "alias_tags=${{ steps.rechunk.outputs.version }}" >> $GITHUB_OUTPUT
 
       - name: Push to GHCR
         if: github.event_name != 'pull_request'
@@ -211,8 +210,16 @@ jobs:
           attempt_delay: 15000
           command: |
             echo "${{ secrets.GITHUB_TOKEN }}" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
-            dest="${{ steps.registry_case.outputs.lowercase }}/${{ env.IMAGE_NAME }}:${{ steps.generate-tags.outputs.alias_tags }}"
-            sudo skopeo copy ${{ steps.rechunk.outputs.ref }} docker://$dest
+            for tag in ${{ steps.generate-tags.outputs.alias_tags }}; do
+              dest="${{ steps.registry_case.outputs.lowercase }}/${{ env.IMAGE_NAME }}:$tag"
+              sudo skopeo copy ${{ steps.rechunk.outputs.ref }} docker://$dest
+            done
+
+      - name: Get Image Digest
+        id: digest
+        run: |
+          DIGEST=$(sudo skopeo inspect --format '{{.Digest}}' ${{ steps.rechunk.outputs.ref }})
+          echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
 
       - name: Sign container image
         if: github.event_name != 'pull_request'
@@ -221,7 +228,7 @@ jobs:
           containers: ${{ env.IMAGE_NAME }}
           registry-token: ${{ secrets.GITHUB_TOKEN }}
           signing-secret: ${{ secrets.SIGNING_SECRET }}
-          tags: ${{ steps.generate-tags.outputs.alias_tags }}
+          tags: ${{ steps.digest.outputs.digest }}
           registry: ${{ env.PUSH_IMAGE_REGISTRY }}
 
   generate_release:
