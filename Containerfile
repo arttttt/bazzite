@@ -82,7 +82,6 @@ RUN --mount=type=cache,dst=/var/cache \
     dnf5 -y copr enable danayer/libdrm-git && \
     dnf5 -y copr enable danayer/linux-firmware-git && \
     dnf5 -y copr enable danayer/Vulkan-Git && \
-    dnf5 -y copr enable xxmitsu/mesa-git && \
     dnf5 -y install dnf5-plugins && \
     for copr in \
         bazzite-org/bazzite \
@@ -114,11 +113,10 @@ RUN --mount=type=cache,dst=/var/cache \
     dnf5 -y config-manager addrepo --from-repofile=https://negativo17.org/repos/fedora-rar.repo && \
     dnf5 -y config-manager setopt "*bazzite*".priority=1 && \
     dnf5 -y config-manager setopt "*akmods*".priority=2 && \
-    dnf5 -y config-manager setopt "copr:copr.fedorainfracloud.org:xxmitsu:mesa-git".priority=2 && \
-    dnf5 -y config-manager setopt "copr:copr.fedorainfracloud.org:danayer:mesa-git".priority=3 && \
-    dnf5 -y config-manager setopt "copr:copr.fedorainfracloud.org:danayer:libdrm-git".priority=3 && \
-    dnf5 -y config-manager setopt "copr:copr.fedorainfracloud.org:danayer:linux-firmware-git".priority=3 && \
-    dnf5 -y config-manager setopt "copr:copr.fedorainfracloud.org:danayer:Vulkan-Git".priority=3 && \
+    dnf5 -y config-manager setopt "copr:copr.fedorainfracloud.org:danayer:mesa-git".priority=2 && \
+    dnf5 -y config-manager setopt "copr:copr.fedorainfracloud.org:danayer:libdrm-git".priority=2 && \
+    dnf5 -y config-manager setopt "copr:copr.fedorainfracloud.org:danayer:linux-firmware-git".priority=2 && \
+    dnf5 -y config-manager setopt "copr:copr.fedorainfracloud.org:danayer:Vulkan-Git".priority=2 && \
     dnf5 -y config-manager setopt "*terra*".priority=4 "*terra*".exclude="nerd-fonts topgrade mesa-*" && \
     dnf5 -y config-manager setopt "terra-nvidia".enabled=false && \
     dnf5 -y config-manager setopt "terra-mesa".enabled=false && \
@@ -191,7 +189,14 @@ RUN --mount=type=cache,dst=/var/cache \
     for repo in "${!toswap[@]}"; do \
         for package in ${toswap[$repo]}; do dnf5 -y swap --repo=$repo $package $package; done; \
     done && unset -v toswap repo package && \
-    dnf5 -y distro-sync && \
+    dnf5 -y distro-sync \
+        mesa-filesystem \
+        mesa-dri-drivers \
+        mesa-libEGL \
+        mesa-libGL \
+        mesa-libgbm \
+        mesa-va-drivers \
+        mesa-vulkan-drivers && \
     dnf5 versionlock add \
         pipewire \
         pipewire-alsa \
