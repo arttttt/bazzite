@@ -78,6 +78,11 @@ RUN --mount=type=cache,dst=/var/cache \
     --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
     mkdir -p /var/roothome && \
+    dnf5 -y copr enable danayer/mesa-git && \
+    dnf5 -y copr enable danayer/libdrm-git && \
+    dnf5 -y copr enable danayer/linux-firmware-git && \
+    dnf5 -y copr enable danayer/Vulkan-Git && \
+    dnf5 -y copr enable xxmitsu/mesa-git && \
     dnf5 -y install dnf5-plugins && \
     for copr in \
         bazzite-org/bazzite \
@@ -109,9 +114,14 @@ RUN --mount=type=cache,dst=/var/cache \
     dnf5 -y config-manager addrepo --from-repofile=https://negativo17.org/repos/fedora-rar.repo && \
     dnf5 -y config-manager setopt "*bazzite*".priority=1 && \
     dnf5 -y config-manager setopt "*akmods*".priority=2 && \
-    dnf5 -y config-manager setopt "*terra*".priority=3 "*terra*".exclude="nerd-fonts topgrade" && \
-    dnf5 -y config-manager setopt "terra-mesa".enabled=true && \
+    dnf5 -y config-manager setopt "copr:copr.fedorainfracloud.org:xxmitsu:mesa-git".priority=2 && \
+    dnf5 -y config-manager setopt "copr:copr.fedorainfracloud.org:danayer:mesa-git".priority=3 && \
+    dnf5 -y config-manager setopt "copr:copr.fedorainfracloud.org:danayer:libdrm-git".priority=3 && \
+    dnf5 -y config-manager setopt "copr:copr.fedorainfracloud.org:danayer:linux-firmware-git".priority=3 && \
+    dnf5 -y config-manager setopt "copr:copr.fedorainfracloud.org:danayer:Vulkan-Git".priority=3 && \
+    dnf5 -y config-manager setopt "*terra*".priority=4 "*terra*".exclude="nerd-fonts topgrade mesa-*" && \
     dnf5 -y config-manager setopt "terra-nvidia".enabled=false && \
+    dnf5 -y config-manager setopt "terra-mesa".enabled=false && \
     eval "$(/ctx/dnf5-setopt setopt '*negativo17*' priority=4 exclude='mesa-* *xone*')" && \
     dnf5 -y config-manager setopt "*rpmfusion*".priority=5 "*rpmfusion*".exclude="mesa-*" && \
     dnf5 -y config-manager setopt "*fedora*".exclude="mesa-* kernel-core-* kernel-modules-* kernel-uki-virt-*" && \
