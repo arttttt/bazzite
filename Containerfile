@@ -186,12 +186,12 @@ RUN --mount=type=cache,dst=/var/cache \
         ["copr:copr.fedorainfracloud.org:bazzite-org:bazzite"]="wireplumber" \
         ["copr:copr.fedorainfracloud.org:bazzite-org:bazzite-multilib"]="pipewire bluez xorg-x11-server-Xwayland" \
         ["terra-extras"]="switcheroo-control" \
-        ["terra-mesa"]="mesa-filesystem" \
         ["copr:copr.fedorainfracloud.org:ublue-os:staging"]="fwupd" \
     ) && \
     for repo in "${!toswap[@]}"; do \
         for package in ${toswap[$repo]}; do dnf5 -y swap --repo=$repo $package $package; done; \
     done && unset -v toswap repo package && \
+    dnf5 -y distro-sync && \
     dnf5 versionlock add \
         pipewire \
         pipewire-alsa \
